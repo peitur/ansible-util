@@ -1,0 +1,4 @@
+roles/*
+playbooks/*
+*.json
+*.yml

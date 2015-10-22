@@ -1,0 +1,109 @@
+#!/usr/bin/python3
+
+import re, sys, os, getopt
+
+########################################################################
+
+## Each directory will get a main.yml file
+DIRECTORIES = ['defaults','vars','files','templates','tasks','handlers','meta']
+DEFAULT_FILE = "main.yml"
+
+
+debug = False
+########################################################################
+## Functions
+########################################################################
+def create_dirs( project, options ):
+
+	nomain = None
+	silent = None
+
+	if 'nomain' in options: nomain = options['nomain']
+	if 'silent' in options: silent = options['silent']
+
+	if debug: print( "P: %(project)s M: %(nomain)s S: %(silent)s " % { 'project': project, 'nomain': nomain, 'silent': silent  } )
+
+	response = []
+	try:
+
+		for p in DIRECTORIES:
+			path = project+"/"+p
+			filename = path+"/"+DEFAULT_FILE
+
+			if( not os.path.exists( path ) ):
+				if not silent or debug: print("Creating directory: %(path)s" % {'path':path} )
+				os.makedirs( path )
+				response.append( path )
+
+			if( not os.path.exists( filename ) and not nomain ): 
+				if not silent or debug: print("Creating skeleton file: %(fname)s" % {'fname':filename} )
+				open( filename, "w" ).close()
+				response.append( filename )
+
+		return response
+
+	except:
+		raise
+
+	return response
+
+
+def handle_init( project, argv = [] ):
+
+	try:
+		optlist, args = getopt.getopt( argv, "dms", ['debug','nomain','silent'])
+	except getopt.GetoptError as err:
+		print("Options: %(error)s" % { 'error': err.__str__() } )
+		sys.exit(1)
+
+	nomain = False
+	silent = False
+	debug = False
+
+	for opt,arg in optlist:
+		if( opt   in ("-d","--debug" ) ): debug = True
+		elif( opt in ("-m","--nomain" ) ): nomain = True
+		elif( opt in ("-s","--silent" ) ): silent = True
+
+	if not silent or debug: print("Trying Initializing %(project)s" % {'project': project })
+
+	elements = create_dirs( project, { 'silent': silent , 'nomain': nomain } )
+
+	if not silent or debug: print("Created %(obj)s" % {'obj': len( elements ) })
+
+
+def handle_append( project, argv ):
+	pass
+
+def handle_convert( project, argv ):
+	pass
+
+def handle_json2yaml( project, argv ):
+	pass
+
+########################################################################
+### Main 
+########################################################################
+## subcommand
+scommand = None
+project = None
+script = None
+
+try:
+	script = sys.argv.pop(0)
+	scommand = sys.argv.pop(0)
+	project = sys.argv.pop(0)
+
+except Exception as error:
+	print("ERROR: %(error)s " % {'error':error } )
+
+if( scommand == 'init' and project != None ):
+	handle_init( project, sys.argv )
+elif( scommand == 'append' and project != None ):
+	pass
+elif( scommand == 'convert' and project != None ):
+	pass
+elif( scommand == 'j2y' and project != None ):
+	pass
+else:
+	print("ERROR: Unknown subcommand %(cmd)s" % {'cmd': scommand } )
