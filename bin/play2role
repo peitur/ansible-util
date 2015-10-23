@@ -6,39 +6,135 @@ import re, sys, os, getopt
 
 ## Each directory will get a main.yml file
 DIRECTORIES = ['defaults','vars','files','templates','tasks','handlers','meta']
-DEFAULT_FILE = "main.yml"
+DEFAULT_FILE = "main"
+JSON_ENDING = ".json"
+YAML_ENDING = ".yml"
+TMPL_ENDING = ".j2"
 
 
 debug = False
 ########################################################################
 ## Functions
 ########################################################################
+
+def is_yaml( filename ):
+	if( re.match( r".+\.yml$", filename ) ):
+		return True
+	return False
+
+def is_json( filename ):
+	print("Check: %(fname)s" % {'fname': filename})
+	if( re.match( r".+\.json$", filename ) ):
+		return True
+	return False
+
+def is_template( filename ):
+	if( re.match( r".+\.j2$", filename ) ):
+		return True
+	return False
+
+
+def iterate_project( project, options ):
+
+	## Iterate through all project directories (project == role).
+	## Return a list of all files in it.
+	## Only scans registered directories
+	## Returns full path, will loose track of files otherwise 
+
+	debug = False
+
+	if 'debug' in options: debug = options['debug']
+
+	reply = []
+
+	for d in DIRECTORIES:
+
+		dirpath = project+"/"+d
+		if not os.path.exists( dirpath ): raise RuntimeError("Incomplete project: "+project+" missing "+d )
+
+		for f in os.listdir( project+"/"+d ):
+			filepath = dirpath+"/"+f
+			reply.append( filepath )
+
+			if debug: print("DEBUG[IterateAppend]: %(app)s" % { 'app': filepath  } )
+
+
+	if debug: print("DEBUG[IterateResult]: %(num)d" % { 'num': len(reply) } )
+
+	return reply
+
+
+def filter_profile( inlist, options ):
+	## Filter the list for pattern
+	## 
+
+	debug = False
+	inc_json = None
+	inc_yaml = None
+	inc_templates = None
+
+	if 'debug' in options: debug = options['debug']
+
+	if 'json' in options: inc_json = options['json']
+	if 'yaml' in options: inc_yaml = options['yaml']
+	if 'templates' in options: inc_templates = options['templates']
+
+	if( debug ): print("DEBUG[Filter]: S:%(insize)d J:%(json)s Y:%(yaml)s T:%(templ)s " % { 'insize': len( inlist ),'json': inc_json,'yaml': inc_yaml,'templ':inc_templates} )
+
+	reply = []
+	for f in inlist:
+		if( inc_json and is_json( f )  ): reply.append( f )
+		if( inc_yaml and is_yaml( f )  ): reply.append( f )
+		if( inc_templates and is_template( f )  ): reply.append( f )
+
+
+	return reply
+
+
+
 def create_dirs( project, options ):
 
 	nomain = None
 	silent = None
+	with_yaml = None
+	with_json = None
+
+	if 'debug' in options: debug = options['debug']
 
 	if 'nomain' in options: nomain = options['nomain']
 	if 'silent' in options: silent = options['silent']
+	if 'json' in options: with_json = options['json']
+	if 'yaml' in options: with_yaml = options['yaml']
 
-	if debug: print( "P: %(project)s M: %(nomain)s S: %(silent)s " % { 'project': project, 'nomain': nomain, 'silent': silent  } )
+
+	if debug: print( "P: %(project)s M: %(nomain)s S: %(silent)s J:%(json)s Y:%(yaml)s" % { 'project': project, 'nomain': nomain, 'silent': silent, 'json': with_json ,'yaml':with_yaml  } )
 
 	response = []
 	try:
 
 		for p in DIRECTORIES:
 			path = project+"/"+p
-			filename = path+"/"+DEFAULT_FILE
+			jsonfilename = path+"/"+DEFAULT_FILE+JSON_ENDING
+			yamlfilename = path+"/"+DEFAULT_FILE+YAML_ENDING
 
 			if( not os.path.exists( path ) ):
 				if not silent or debug: print("Creating directory: %(path)s" % {'path':path} )
 				os.makedirs( path )
 				response.append( path )
 
-			if( not os.path.exists( filename ) and not nomain ): 
-				if not silent or debug: print("Creating skeleton file: %(fname)s" % {'fname':filename} )
-				open( filename, "w" ).close()
-				response.append( filename )
+			if( with_json and not os.path.exists( jsonfilename ) and not nomain ): 
+				if not silent or debug: print("Creating JSON skeleton file: %(fname)s" % {'fname':jsonfilename} )
+				
+				open( jsonfilename, "w" ).close()
+				response.append( jsonfilename )
+
+			if( with_yaml and not os.path.exists( yamlfilename ) and not nomain ): 
+				if not silent or debug: print("Creating YAML skeleton file: %(fname)s" % {'fname':yamlfilename} )
+
+				open( yamlfilename, "w" ).close()
+				response.append( yamlfilename )
+
+
 
 		return response
 
@@ -51,11 +147,13 @@ def create_dirs( project, options ):
 def handle_init( project, argv = [] ):
 
 	try:
-		optlist, args = getopt.getopt( argv, "dms", ['debug','nomain','silent'])
+		optlist, args = getopt.getopt( argv, "dmsjy", ['debug','nomain','silent','json','yaml'])
 	except getopt.GetoptError as err:
 		print("Options: %(error)s" % { 'error': err.__str__() } )
 		sys.exit(1)
 
+	with_json = False
+	with_yaml = False
 	nomain = False
 	silent = False
 	debug = False
@@ -64,22 +162,89 @@ def handle_init( project, argv = [] ):
 		if( opt   in ("-d","--debug" ) ): debug = True
 		elif( opt in ("-m","--nomain" ) ): nomain = True
 		elif( opt in ("-s","--silent" ) ): silent = True
-
+		elif( opt in ("-j","--json" ) ): with_json = True
+		elif( opt in ("-y","--yaml" ) ): with_yaml = True
+		
 	if not silent or debug: print("Trying Initializing %(project)s" % {'project': project })
 
-	elements = create_dirs( project, { 'silent': silent , 'nomain': nomain } )
+	elements = create_dirs( project, { 'silent': silent , 'nomain': nomain, 'json': with_json, 'yaml': with_yaml, 'debug': debug } )
 
 	if not silent or debug: print("Created %(obj)s" % {'obj': len( elements ) })
 
 
 def handle_append( project, argv ):
+
+	try:
+		optlist, args = getopt.getopt( argv, "ds", ['debug','silent'])
+	except getopt.GetoptError as err:
+		print("Options: %(error)s" % { 'error': err.__str__() } )
+		sys.exit(1)
+
+	overwrite = True
+	silent = False
+	debug = False
+
 	pass
 
-def handle_convert( project, argv ):
-	pass
+def handle_convert( srcproject, trgproject, argv ):
+	## convert 
+
+	try:
+		optlist, args = getopt.getopt( argv, "dsf:t:", ['debug','silent','from','to'])
+	except getopt.GetoptError as err:
+		print("Options: %(error)s" % { 'error': err.__str__() } )
+		sys.exit(1)
+
+	overwrite = True
+	silent = False
+	debug = False
+
+	from_format = "json"
+	to_format = "yaml"
+
+
+
+	if not silent or debug: print("Trying to convert %(project)s to %(trgproject)s" % {'project': srcproject, 'trgproject': trgproject })
+
+	for opt,arg in optlist:
+		if( opt   in ("-d","--debug" ) ): debug = True
+		elif( opt in ("-s","--silent" ) ): silent = True
+		elif( opt in ("-f","--from" ) ): from_format = arg
+		elif( opt in ("-t","--to" ) ): to_format = arg
+
+
+
+
+
+	jsonfiles = filter_profile( iterate_project( project, { 'debug': debug } ), { 'debug': debug } )
+
+	if not silent or debug: print("Converted %(obj)s" % {'obj': len( jsonfiles ) })
+
+
+
 
 def handle_json2yaml( project, argv ):
+	try:
+		optlist, args = getopt.getopt( argv, "ds", ['debug','silent'])
+	except getopt.GetoptError as err:
+		print("Options: %(error)s" % { 'error': err.__str__() } )
+		sys.exit(1)
+
+	overwrite = True
+	silent = False
+	debug = False
+
+	for opt,arg in optlist:
+		if( opt   in ("-d","--debug" ) ): debug = True
+
+
+	jsonfiles = filter_profile( iterate_project( project, { 'debug': debug } ), { 'debug': debug, 'json':True } )
+
+
 	pass
+
+def print_help():
+	print("HELP")
 
 ########################################################################
 ### Main 
@@ -88,6 +253,8 @@ def handle_json2yaml( project, argv ):
 scommand = None
 project = None
 script = None
+
+#print(">>>> %(argv)s" % {'argv': sys.argv })
 
 try:
 	script = sys.argv.pop(0)
@@ -98,12 +265,22 @@ except Exception as error:
 	print("ERROR: %(error)s " % {'error':error } )
 
 if( scommand == 'init' and project != None ):
+	
 	handle_init( project, sys.argv )
+
+elif( scommand == 'extract' and project != None ):
+	pass
 elif( scommand == 'append' and project != None ):
 	pass
 elif( scommand == 'convert' and project != None ):
-	pass
+	
+	trgproject = sys.argv.pop(0)
+	handle_convert( project, trgproject, sys.argv )
+
 elif( scommand == 'j2y' and project != None ):
 	pass
 else:
 	print("ERROR: Unknown subcommand %(cmd)s" % {'cmd': scommand } )
+
+
+
