@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import re, sys, os, getopt
+import json, yaml
 
 ########################################################################
 
@@ -23,7 +24,6 @@ def is_yaml( filename ):
 	return False
 
 def is_json( filename ):
-	print("Check: %(fname)s" % {'fname': filename})
 	if( re.match( r".+\.json$", filename ) ):
 		return True
 	return False
@@ -91,6 +91,68 @@ def filter_profile( inlist, options ):
 	return reply
 
 
+def convert_json2yaml( ):
+	pass
+
+def convert_yaml2json( ):
+	pass
+
+def load_yaml( filename, options ):
+	debug = None
+	if 'debug' in options: debug = options['debug']
+
+	data = ""
+	try:
+		fd = open( filename, "r" )
+		for line in fd:	
+			data += line
+
+		return yaml.load( data )
+	except:
+		raise
+	finally:
+		if( fd ): fd.close()
+
+	return None
+
+
+def load_json( filename, options ):
+	debug = None
+
+	if 'debug' in options: debug = options['debug']
+
+	data = ""
+	try:
+		fd = open( filename, "r" )
+		for line in fd:	
+			data += line
+		return json.loads( data )
+	except:
+		raise
+	finally:
+		if( fd ): fd.close()
+
+	return None
+
+
+def split_playbook( filename, options ):
+
+	data = None
+	debug = None
+
+	if 'debug' in options: debug = options['debug']
+
+	if( is_yaml( filename ) ):
+		data= load_yaml( filename, options )
+
+	if( is_json( filename ) ):
+		data = load_json( filename, options )
+
+	for d in data:
+		print( " %(s)s" % {'s': d.keys() } )	
+
+	return data
+
 
 def create_dirs( project, options ):
 
@@ -107,7 +169,7 @@ def create_dirs( project, options ):
 	if 'yaml' in options: with_yaml = options['yaml']
 
 
-	if debug: print( "P: %(project)s M: %(nomain)s S: %(silent)s J:%(json)s Y:%(yaml)s" % { 'project': project, 'nomain': nomain, 'silent': silent, 'json': with_json ,'yaml':with_yaml  } )
+	if debug: print( "DEBUG[CreateDir]:P: %(project)s M: %(nomain)s S: %(silent)s J:%(json)s Y:%(yaml)s" % { 'project': project, 'nomain': nomain, 'silent': silent, 'json': with_json ,'yaml':with_yaml  } )
 
 	response = []
 	try:
@@ -175,7 +237,7 @@ def handle_init( project, argv = [] ):
 def handle_append( project, argv ):
 
 	try:
-		optlist, args = getopt.getopt( argv, "ds", ['debug','silent'])
+		optlist, args = getopt.getopt( argv, "dsp:r:", ['debug','silent','playbook=','role='])
 	except getopt.GetoptError as err:
 		print("Options: %(error)s" % { 'error': err.__str__() } )
 		sys.exit(1)
@@ -183,11 +245,35 @@ def handle_append( project, argv ):
 	overwrite = True
 	silent = False
 	debug = False
+	playbook = None
+	role = None
+
+	for opt,arg in optlist:
+		if( opt   in ("-d","--debug" ) ): debug = True
+		elif( opt in ("-s","--silent" ) ): silent = True
+		elif( opt in ("-p","--playbook") ): playbook = arg
+		elif( opt in ("-r","--role") ): role = arg
+
+	print("DEBUG: D:%(debug)s S:%(silent)s P:%(playbook)s R:%(role)s" % { 'debug': debug, 'silent': silent, 'playbook': playbook, 'role': role } )		
+
+	if( playbook ):
+
+		if not silent or debug: print("Trying appending playbook %(inf)s to %(project)s" % { 'inf': playbook,'project': project })
+		yml = split_playbook( playbook, { 'debug': debug })
+
+
+	elif( role ):
+		if not silent or debug: print("Trying appending role %(inf)s to %(project)s" % { 'inf': role,'project': project })
+
+	else:
+		print("ERROR: Unknown input: must be a playbook or role")
 
 	pass
 
-def handle_convert( srcproject, trgproject, argv ):
+def handle_convert( srcproject, argv ):
 	## convert 
+
+	trgproject = argv.pop(0)
 
 	try:
 		optlist, args = getopt.getopt( argv, "dsf:t:", ['debug','silent','from','to'])
@@ -243,8 +329,9 @@ def handle_json2yaml( project, argv ):
 
 	pass
 
-def print_help():
-	print("HELP")
+def print_help( script ):
+	print("%(script)s <task> [options]" % { 'script': script } )
+	print("")
 
 ########################################################################
 ### Main 
@@ -271,11 +358,12 @@ if( scommand == 'init' and project != None ):
 elif( scommand == 'extract' and project != None ):
 	pass
 elif( scommand == 'append' and project != None ):
-	pass
+
+	handle_append( project, sys.argv )
+	
 elif( scommand == 'convert' and project != None ):
 	
-	trgproject = sys.argv.pop(0)
-	handle_convert( project, trgproject, sys.argv )
+	handle_convert( project, sys.argv )
 
 elif( scommand == 'j2y' and project != None ):
 	pass
