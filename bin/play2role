@@ -134,13 +134,86 @@ def load_json( filename, options ):
 
 	return None
 
+def write_yaml_file( filename, data, *options ):
+
+	debug = None
+	overwrite = True
+	if 'debug' in options: debug = options['debug']
+	if 'overwrite' in options: complete = options['overwrite']
+	if(debug) : print("DEBUG[WriteYaml]: F:%(filename)s" % {'filename': filename})
+
+	if( os.path.exists( filename ) and not overwrite ): return None
+
+	try:
+		fd = open( filename, "w" )
+		yaml.dump( data, fd , explicit_start=True, default_flow_style=False )
+		fd.close()
+	except Exception as error:
+		print("ERROR[WriteYaml]: %(error)s" & {error} )
+		raise
+		
+	return True
+
+
+def write_json_file( filename, data, *options ):
+
+	debug = None
+	overwrite = True
+	if 'debug' in options: debug = options['debug']
+	if 'overwrite' in options: complete = options['overwrite']
+	if(debug) : print("DEBUG[WriteJson]: F:%(filename)s" % {'filename': filename})
+
+	if( os.path.exists( filename) and not overwrite ): return None
+
+	try:
+		fd = open( filename, "w" )
+		fd.write( json.dumps( data ) )
+		fd.close()
+	except Exception as error:
+		print("ERROR[WriteJson]: %(error)s" & {error} )
+		raise
+		
+	return True
+
+def write_file( filename, data, options ):
+
+	format = 'yaml'
+	debug = None
+	overwrite = True
+
+	if 'debug' in options: debug = options['debug']
+	if 'overwrite' in options: complete = options['overwrite']
+
+	if( is_json( filename ) ):
+		format = 'json'
+
+	if( is_yaml( filename ) ):
+		format = 'yaml'
+
+	if(debug) : print("DEBUG[WriteFile]: File:%(filename)s D:%(debug)s O:%(overwrite)s F:%(format)s" % {'filename': filename, 'debug':debug, 'overwrite':overwrite, 'format':format})
+
+
+
+	if( format == 'yaml') : 
+		return write_yaml_file( filename, data )
+
+	elif( format == 'json' ):
+		return write_json_file( filename, data )
+
+	else:
+		print("ERROR: Unknown file format : %(format)s " % { 'format': format } )
+
+	return None
+
 
 def split_playbook( filename, options ):
 
 	data = None
 	debug = None
+	complete = None
 
 	if 'debug' in options: debug = options['debug']
+	if 'complete' in options: complete = options['complete']
 
 	if( is_yaml( filename ) ):
 		data= load_yaml( filename, options )
@@ -148,11 +221,26 @@ def split_playbook( filename, options ):
 	if( is_json( filename ) ):
 		data = load_json( filename, options )
 
+	result = {}
+	result['playbook'] = {}
 	for d in data:
-		print( " %(s)s" % {'s': d.keys() } )	
+		for k in d.keys():
 
-	return data
+			if( k in DIRECTORIES ):
+				result[k] = d[k]
+			else:
+				result['playbook'][ k ] = d[k]
 
+	if complete :
+		for d in DIRECTORIES:
+			if( d not in result ):
+				result[d] = []
+
+	return result
+
+
+def merge_role( rolename, options ):
+	pass
 
 def create_dirs( project, options ):
 
@@ -187,13 +275,16 @@ def create_dirs( project, options ):
 			if( with_json and not os.path.exists( jsonfilename ) and not nomain ): 
 				if not silent or debug: print("Creating JSON skeleton file: %(fname)s" % {'fname':jsonfilename} )
 				
-				open( jsonfilename, "w" ).close()
+				#open( jsonfilename, "w" ).close()
+				write_file( jsonfilename, "[]", {'debug':debug, 'overwrite':False})
 				response.append( jsonfilename )
 
 			if( with_yaml and not os.path.exists( yamlfilename ) and not nomain ): 
 				if not silent or debug: print("Creating YAML skeleton file: %(fname)s" % {'fname':yamlfilename} )
 
-				open( yamlfilename, "w" ).close()
+				#open( yamlfilename, "w" ).close()
+				write_file( yamlfilename, "[]", {'debug':debug, 'overwrite':False})
+
 				response.append( yamlfilename )
 
 
@@ -237,7 +328,7 @@ def handle_init( project, argv = [] ):
 def handle_append( project, argv ):
 
 	try:
-		optlist, args = getopt.getopt( argv, "dsp:r:", ['debug','silent','playbook=','role='])
+		optlist, args = getopt.getopt( argv, "dspo:r:", ['debug','silent','playbook=','role=','overwrite'])
 	except getopt.GetoptError as err:
 		print("Options: %(error)s" % { 'error': err.__str__() } )
 		sys.exit(1)
@@ -251,6 +342,7 @@ def handle_append( project, argv ):
 	for opt,arg in optlist:
 		if( opt   in ("-d","--debug" ) ): debug = True
 		elif( opt in ("-s","--silent" ) ): silent = True
+		elif( opt in ("-o","--overwrite" ) ): overwrite = True
 		elif( opt in ("-p","--playbook") ): playbook = arg
 		elif( opt in ("-r","--role") ): role = arg
 
@@ -259,8 +351,24 @@ def handle_append( project, argv ):
 	if( playbook ):
 
 		if not silent or debug: print("Trying appending playbook %(inf)s to %(project)s" % { 'inf': playbook,'project': project })
-		yml = split_playbook( playbook, { 'debug': debug })
+		dsplit = split_playbook( playbook, { 'debug': debug })
+		if 'playbook' in dsplit:
+			dsplit['playbook']['roles'] = [project]
 
+
+		for d in DIRECTORIES:
+			if d in dsplit:
+
+				playbook_plist = re.split(r"\/", playbook )
+				playbook_name = playbook_plist[-1]
+				playbook_list = re.split( r"\.", playbook_name )
+				filename = project+"/"+d+"/"+playbook_list[0]+".yml"
+
+				print("DEBUG[DsplitIter]: Dir:%(d)s F:%(f)s" % { 'd': d, 'f':filename } )
+
+				write_file( filename, dsplit[d], {'debug':debug, 'overwrite':True} )
+
+		
 
 	elif( role ):
 		if not silent or debug: print("Trying appending role %(inf)s to %(project)s" % { 'inf': role,'project': project })
@@ -268,7 +376,13 @@ def handle_append( project, argv ):
 	else:
 		print("ERROR: Unknown input: must be a playbook or role")
 
+
+
 	pass
+
+
+
+
 
 def handle_convert( srcproject, argv ):
 	## convert 
