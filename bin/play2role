@@ -6,6 +6,30 @@ import json, yaml
 ########################################################################
 
 ## Each directory will get a main.yml file
+SUBTASKS = {
+	'init':{
+		'options':{
+				'd,debug' :"Print debug information",
+				'n,nomain':"Do not create main.yml files",
+				's,silent':"No extra output",
+				'j,json'  :"Only create json files",
+				'y,yaml'  :"Only create yaml files (default)"
+			},
+		'description':"Initialize a role"
+	},
+	'append':{
+		'options':{
+				'd,debug':"Print debug information",
+				'n,nomain':"Do not create main.yml files",
+				's,silent':"No extra output",
+				'p,playbook':"Playbook to merge into main role",
+				'r,role':"Role to merge into main role",
+				'o,overwrite':"Overwrite already existing file",
+				't,template':"Include template files"
+			},
+		'description':"Append a playbook or role onto a preexistsing role"
+	}
+}
 DIRECTORIES = ['defaults','vars','files','templates','tasks','handlers','meta']
 DEFAULT_FILE = "main"
 JSON_ENDING = ".json"
@@ -276,14 +300,14 @@ def create_dirs( project, options ):
 				if not silent or debug: print("Creating JSON skeleton file: %(fname)s" % {'fname':jsonfilename} )
 				
 				#open( jsonfilename, "w" ).close()
-				write_file( jsonfilename, "[]", {'debug':debug, 'overwrite':False})
+				write_file( jsonfilename, "", {'debug':debug, 'overwrite':False})
 				response.append( jsonfilename )
 
 			if( with_yaml and not os.path.exists( yamlfilename ) and not nomain ): 
 				if not silent or debug: print("Creating YAML skeleton file: %(fname)s" % {'fname':yamlfilename} )
 
 				#open( yamlfilename, "w" ).close()
-				write_file( yamlfilename, "[]", {'debug':debug, 'overwrite':False})
+				write_file( yamlfilename, "", {'debug':debug, 'overwrite':False})
 
 				response.append( yamlfilename )
 
@@ -328,7 +352,7 @@ def handle_init( project, argv = [] ):
 def handle_append( project, argv ):
 
 	try:
-		optlist, args = getopt.getopt( argv, "dspo:r:", ['debug','silent','playbook=','role=','overwrite'])
+		optlist, args = getopt.getopt( argv, "dspno:r:", ['debug','silent','playbook=','role=','overwrite','nomain'])
 	except getopt.GetoptError as err:
 		print("Options: %(error)s" % { 'error': err.__str__() } )
 		sys.exit(1)
@@ -338,6 +362,7 @@ def handle_append( project, argv ):
 	debug = False
 	playbook = None
 	role = None
+	nomain = False
 
 	for opt,arg in optlist:
 		if( opt   in ("-d","--debug" ) ): debug = True
@@ -345,8 +370,9 @@ def handle_append( project, argv ):
 		elif( opt in ("-o","--overwrite" ) ): overwrite = True
 		elif( opt in ("-p","--playbook") ): playbook = arg
 		elif( opt in ("-r","--role") ): role = arg
+		elif( opt in ("-n","--nomain") ): nomain = True
 
-	print("DEBUG: D:%(debug)s S:%(silent)s P:%(playbook)s R:%(role)s" % { 'debug': debug, 'silent': silent, 'playbook': playbook, 'role': role } )		
+	print("DEBUG: D:%(debug)s S:%(silent)s P:%(playbook)s R:%(role)s M:%(main)s" % { 'main': nomain,'debug': debug, 'silent': silent, 'playbook': playbook, 'role': role } )		
 
 	if( playbook ):
 
@@ -362,11 +388,14 @@ def handle_append( project, argv ):
 				playbook_plist = re.split(r"\/", playbook )
 				playbook_name = playbook_plist[-1]
 				playbook_list = re.split( r"\.", playbook_name )
-				filename = project+"/"+d+"/"+playbook_list[0]+".yml"
+
+				if( nomain ):
+					filename = project+"/"+d+"/"+playbook_list[0]+".yml"
+				else:
+					filename = project+"/"+d+"/main.yml"
 
 				print("DEBUG[DsplitIter]: Dir:%(d)s F:%(f)s" % { 'd': d, 'f':filename } )
-
-				write_file( filename, dsplit[d], {'debug':debug, 'overwrite':True} )
+				write_file( filename, dsplit[d], {'debug':debug, 'overwrite':overwrite, 'main':True} )
 
 		
 
@@ -415,11 +444,14 @@ def handle_convert( srcproject, argv ):
 
 
 
-
-	jsonfiles = filter_profile( iterate_project( project, { 'debug': debug } ), { 'debug': debug } )
-
-	if not silent or debug: print("Converted %(obj)s" % {'obj': len( jsonfiles ) })
-
+#
+#	jsonfiles = filter_profile( iterate_project( project, { 'debug': debug } ), { 'debug': debug } )
+#
+#	if not silent or debug: print("Converted %(obj)s" % {'obj': len( jsonfiles ) })
+#
+	print("INFO: This feature is not yet implemented. Please use ")
+	print("play2role init <rolename>")
+	print("play2role append <rolename> --playbook <playbook>")
 
 
 
@@ -443,9 +475,40 @@ def handle_json2yaml( project, argv ):
 
 	pass
 
-def print_help( script ):
-	print("%(script)s <task> [options]" % { 'script': script } )
+def print_task_help( script, task ):
+
+	info = SUBTASKS[task]
+
+	print("Information for %(task)s" % { 'task':task } )
+	print("Description: %(desc)s " % {'desc': info['description'] } )
+	print("Options are:")
+	for opt in info['options']:
+		optl = re.split( ",", opt )
+		opt_desc = info['options'][opt]
+		
+		print( "\t -%(sopt)-3s --%(lopt)-15s %(desc)-32s" % {'sopt': opt[0], 'lopt': optl[1], 'desc': opt_desc } )
+
+
+
+
+def print_help( script, task = None ):
 	print("")
+	print("%(script)s <task> [options]" % { 'script': script } )
+	print("Small tool to go from ansible playbooks to roles")
+	print("")
+	task_list = SUBTASKS.keys()
+	if( not task or task not in task_list ):
+		print("Supported tasks: %(tasks)s" % { 'tasks': str.join( "," , task_list ) } )
+		print("%(script)s help <task> " % { 'script':script } )
+		sys.exit(0)
+
+
+
+	if( task ):
+		print("")
+		print_task_help( script, task )			
+
+
 
 ########################################################################
 ### Main 
@@ -460,12 +523,21 @@ script = None
 try:
 	script = sys.argv.pop(0)
 	scommand = sys.argv.pop(0)
-	project = sys.argv.pop(0)
+	if( len( sys.argv ) > 0 ):
+		project = sys.argv.pop(0)
 
 except Exception as error:
 	print("ERROR: %(error)s " % {'error':error } )
+	print_help( script, project )
+	sys.exit(0)
 
-if( scommand == 'init' and project != None ):
+
+if( scommand == "help" ):
+	
+	print_help( script, project )
+	sys.exit(0)
+
+elif( scommand == 'init' and project != None ):
 	
 	handle_init( project, sys.argv )
 
@@ -483,6 +555,8 @@ elif( scommand == 'j2y' and project != None ):
 	pass
 else:
 	print("ERROR: Unknown subcommand %(cmd)s" % {'cmd': scommand } )
+	print_help( script )
+	sys.exit(0)
 
 
 
