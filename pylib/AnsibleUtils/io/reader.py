@@ -65,4 +65,10 @@ class Reader:
 
 		filename = self.filename
 
+		
+
 		pass
+
+
+if( _name_ == '__main__') :
+	sys.exit()

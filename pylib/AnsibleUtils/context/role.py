@@ -10,3 +10,10 @@ class AnsibleRole:
 	def __initialize__( self, *options ):
 		pass
 
+
+
+
+
+
+if( _name_ == '__main__') :
+	sys.exit()

@@ -12,3 +12,11 @@ class Creator:
 		pass
 
 		
+
+
+
+
+
+
+if( _name_ == '__main__') :
+	sys.exit()

@@ -11,3 +11,11 @@ class AnsiblePlaybook:
 		pass
 
 		
+
+
+
+
+
+
+if( _name_ == '__main__') :
+	sys.exit()

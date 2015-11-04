@@ -1,6 +1,6 @@
 
 
-import re, sys, os, getopt
+import re, sys, os
 import json, yaml
 
 import AnsibleUtil.util
@@ -18,3 +18,8 @@ class Navigator:
 		if 'debug' in options: self.debug = options['debug']
 
 
+
+
+
+if( _name_ == '__main__') :
+	sys.exit()

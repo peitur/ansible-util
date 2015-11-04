@@ -12,3 +12,10 @@ class RoleCreator( AnsibleUtil.admin.creator.Creator ):
 		pass
 
 		
+
+
+
+
+
+if( _name_ == '__main__') :
+	sys.exit()

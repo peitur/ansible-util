@@ -3,6 +3,16 @@
 import re, sys, os, getopt
 import json, yaml
 
+
+import AnsibleUtil.util
+import AnsibleUtil.admin
+import AnsibleUtil.context
+import AnsibleUtil.io 
+import AnsibleUtil.ioformat
+
+
+
+
 ########################################################################
 
 ## Each directory will get a main.yml file
@@ -30,6 +40,7 @@ SUBTASKS = {
 		'description':"Append a playbook or role onto a preexistsing role"
 	}
 }
+
 DIRECTORIES = ['defaults','vars','files','templates','tasks','handlers','meta']
 DEFAULT_FILE = "main"
 JSON_ENDING = ".json"
@@ -42,20 +53,6 @@ debug = False
 ## Functions
 ########################################################################
 
-def is_yaml( filename ):
-	if( re.match( r".+\.yml$", filename ) ):
-		return True
-	return False
-
-def is_json( filename ):
-	if( re.match( r".+\.json$", filename ) ):
-		return True
-	return False
-
-def is_template( filename ):
-	if( re.match( r".+\.j2$", filename ) ):
-		return True
-	return False
 
 
 def iterate_project( project, options ):
@@ -121,113 +118,6 @@ def convert_json2yaml( ):
 def convert_yaml2json( ):
 	pass
 
-def load_yaml( filename, options ):
-	debug = None
-	if 'debug' in options: debug = options['debug']
-
-	data = ""
-	try:
-		fd = open( filename, "r" )
-		for line in fd:	
-			data += line
-
-		return yaml.load( data )
-	except:
-		raise
-	finally:
-		if( fd ): fd.close()
-
-	return None
-
-
-def load_json( filename, options ):
-	debug = None
-
-	if 'debug' in options: debug = options['debug']
-
-	data = ""
-	try:
-		fd = open( filename, "r" )
-		for line in fd:	
-			data += line
-		return json.loads( data )
-	except:
-		raise
-	finally:
-		if( fd ): fd.close()
-
-	return None
-
-def write_yaml_file( filename, data, *options ):
-
-	debug = None
-	overwrite = True
-	if 'debug' in options: debug = options['debug']
-	if 'overwrite' in options: complete = options['overwrite']
-	if(debug) : print("DEBUG[WriteYaml]: F:%(filename)s" % {'filename': filename})
-
-	if( os.path.exists( filename ) and not overwrite ): return None
-
-	try:
-		fd = open( filename, "w" )
-		yaml.dump( data, fd , explicit_start=True, default_flow_style=False )
-		fd.close()
-	except Exception as error:
-		print("ERROR[WriteYaml]: %(error)s" & {error} )
-		raise
-		
-	return True
-
-
-def write_json_file( filename, data, *options ):
-
-	debug = None
-	overwrite = True
-	if 'debug' in options: debug = options['debug']
-	if 'overwrite' in options: complete = options['overwrite']
-	if(debug) : print("DEBUG[WriteJson]: F:%(filename)s" % {'filename': filename})
-
-	if( os.path.exists( filename) and not overwrite ): return None
-
-	try:
-		fd = open( filename, "w" )
-		fd.write( json.dumps( data ) )
-		fd.close()
-	except Exception as error:
-		print("ERROR[WriteJson]: %(error)s" & {error} )
-		raise
-		
-	return True
-
-def write_file( filename, data, options ):
-
-	format = 'yaml'
-	debug = None
-	overwrite = True
-
-	if 'debug' in options: debug = options['debug']
-	if 'overwrite' in options: complete = options['overwrite']
-
-	if( is_json( filename ) ):
-		format = 'json'
-
-	if( is_yaml( filename ) ):
-		format = 'yaml'
-
-	if(debug) : print("DEBUG[WriteFile]: File:%(filename)s D:%(debug)s O:%(overwrite)s F:%(format)s" % {'filename': filename, 'debug':debug, 'overwrite':overwrite, 'format':format})
-
-
-
-	if( format == 'yaml') : 
-		return write_yaml_file( filename, data )
-
-	elif( format == 'json' ):
-		return write_json_file( filename, data )
-
-	else:
-		print("ERROR: Unknown file format : %(format)s " % { 'format': format } )
-
-	return None
 
 
 def split_playbook( filename, options ):

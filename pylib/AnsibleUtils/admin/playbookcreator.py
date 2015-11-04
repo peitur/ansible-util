@@ -12,3 +12,10 @@ class PlaybookCreator(  AnsibleUtil.admin.creator.Creator  ):
 		pass
 
 		
+
+
+
+
+
+if( _name_ == '__main__') :
+	sys.exit()
