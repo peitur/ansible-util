@@ -7,32 +7,27 @@ from AnsibleUtils.util import util
 
 class Reader:
 	
-	def __init__( self, filename, *options ):
+	def __init__( self, filename, options= {} ):
 
 		self.filename = filename
 		self.debug = False
 		self.format = None
 
+		print("Reader, options : %(opt)s" % { 'opt': options })
+
 
 		if 'format' in options: self.format = options['format']
 		if 'debug' in options: self.debug = options['debug']
 
-		if( not format ): format_detect( filename )
-
-	def format_detect( filename ):
-		if( is_json( filename) ): self.format = 'json'
-		elif( is_yaml( filename ) ): self.format = 'yaml'
-		else :
-			raise RuntimeError("Unknown file format sent to reader: "+filename.__str__() )
+		if not self.format: self.format = util.format_detect( filename )
 
 
-	def load_yaml( self, *options ):
+	def load_yaml( self, options = {} ):
+		filename = self.filename		
+		if 'filename' in options: filename = options['filename']
 
 		debug = self.debug
 		if 'debug' in options: debug = options['debug']
-
-
-		filename = self.filename
 
 		data = ""
 		try:
@@ -43,17 +38,18 @@ class Reader:
 			return yaml.load( data )
 		except:
 			raise
-		finally:
-			if( fd ): fd.close()
 
 		return None
 
 
-	def load_json( self, *options ):
+	def load_json( self, options = {}):
 		filename = self.filename
+		if 'filename' in options: filename = options['filename']
 
 		debug = self.debug
 		if 'debug' in options: debug = options['debug']
+
+
 
 		data = ""
 		try:
@@ -63,23 +59,29 @@ class Reader:
 			return json.loads( data )
 		except:
 			raise
-		finally:
-			if( fd ): fd.close()
 
 		return None
 
 
 
-	def read_file( self, *options ):
+	def read_file( self, options = {}):
 		debug = self.debug
 		if 'debug' in options: debug = options['debug']
-		
-		filename = self.filename
+
+		filename = self.filename		
+		if 'filename' in options: filename = options['filename']
+
+
+		if( debug ): print("DEBUG: Reader, reading %(format)s file : %(fname)s " % { 'format': self.format, 'fname': filename })
+
 		try:
-			if( self.format == 'json' ): return load_json( )
-			elif( self.format == 'yaml' ): return load_yaml( )
+			
+			if( self.format == 'json' ): return self.load_json( )
+			elif( self.format == 'yaml' ): return self.load_yaml( )
+			else: raise RuntimeError("No format detected")
+
 		except: 
-			raise
+			raise 
 
 
 	def print_info( self ):
@@ -95,10 +97,16 @@ if( __name__ == '__main__') :
 	print( sys.path.__str__() )
 	print( dir( Reader ) )
 
-	r = AnsibleUtils.io.reader.Reader( "../../playbooks/erlang.json" )
-#	r = Reader( "../../playbooks/erlang.json" )
+	print("###################################################")
+	try:
+		r = AnsibleUtils.io.reader.Reader( "../../../playbooks/erlang.json", { 'debug': True } )
+	#	r = Reader( "../../playbooks/erlang.json" )
 
-	print("Reader : %(r)s" % { 'r' : r })
-	if( r ): r.print_info()
+		print("Reader : %(r)s" % { 'r' : r.read_file() })
+		if( r ): r.print_info()
+	except Exception as error:
+		print("ERROR: %(error)s" % {'error': error })
+
+	print("###################################################")
 
 	sys.exit()
