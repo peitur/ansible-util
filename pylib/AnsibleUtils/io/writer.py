@@ -20,7 +20,7 @@ class Writer:
 		if not self.format: self.format = util.format_detect( filename )
 
 
-	def write_yaml_file( self, data, options = {} ):
+	def __write_yaml_file__( self, data, options = {} ):
 
 		debug = self.debug
 		overwrite = self.overwrite
@@ -46,7 +46,7 @@ class Writer:
 		return True
 
 
-	def write_json_file( self, data, options = {} ):
+	def __write_json_file__( self, data, options = {} ):
 
 		debug = self.debug
 		overwrite = self.overwrite
@@ -85,9 +85,9 @@ class Writer:
 		if(debug) : print("DEBUG[WriteFile]: File:%(filename)s D:%(debug)s O:%(overwrite)s F:%(format)s" % {'filename': filename, 'debug':debug, 'overwrite':overwrite, 'format':format})
 
 		if( format == 'yaml') : 
-			return self.write_yaml_file( data )
+			return self.__write_yaml_file__( data )
 		elif( format == 'json' ):
-			return self.write_json_file( data )
+			return self.__write_json_file__( data )
 		else:
 			print("ERROR: Unknown file format : %(format)s " % { 'format': format } )
 

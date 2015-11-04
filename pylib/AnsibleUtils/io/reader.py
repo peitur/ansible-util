@@ -22,7 +22,7 @@ class Reader:
 		if not self.format: self.format = util.format_detect( filename )
 
 
-	def load_yaml( self, options = {} ):
+	def __load_yaml__( self, options = {} ):
 		filename = self.filename		
 		if 'filename' in options: filename = options['filename']
 
@@ -42,7 +42,7 @@ class Reader:
 		return None
 
 
-	def load_json( self, options = {}):
+	def __load_json__( self, options = {}):
 		filename = self.filename
 		if 'filename' in options: filename = options['filename']
 
@@ -76,8 +76,8 @@ class Reader:
 
 		try:
 			
-			if( self.format == 'json' ): return self.load_json( )
-			elif( self.format == 'yaml' ): return self.load_yaml( )
+			if( self.format == 'json' ): return self.__load_json__( )
+			elif( self.format == 'yaml' ): return self.__load_yaml__( )
 			else: raise RuntimeError("No format detected")
 
 		except: 

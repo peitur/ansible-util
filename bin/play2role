@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import re, sys, os, getopt
-import json, yaml
 
 
 import AnsibleUtils.util
@@ -210,7 +209,7 @@ def create_dirs( project, options ):
 
 	return response
 
-
+###########################################################################
 def handle_init( project, argv = [] ):
 
 	try:
