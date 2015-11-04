@@ -7,7 +7,7 @@ from AnsibleUtils.util import util
 
 class Reader:
 	
-	def __init__( self, filename, options= {} ):
+	def __init__( self, filename, options = {} ):
 
 		self.filename = filename
 		self.debug = False
@@ -99,14 +99,34 @@ if( __name__ == '__main__') :
 
 	print("###################################################")
 	try:
+
 		r = AnsibleUtils.io.reader.Reader( "../../../playbooks/erlang.json", { 'debug': True } )
 	#	r = Reader( "../../playbooks/erlang.json" )
 
 		print("Reader : %(r)s" % { 'r' : r.read_file() })
 		if( r ): r.print_info()
+
 	except Exception as error:
 		print("ERROR: %(error)s" % {'error': error })
 
 	print("###################################################")
+
+	print("###################################################")
+	try:
+
+		r = AnsibleUtils.io.reader.Reader( "../../../playbooks/erlang.yml", { 'debug': True } )
+	#	r = Reader( "../../playbooks/erlang.json" )
+
+		print("Reader : %(r)s" % { 'r' : r.read_file() })
+		if( r ): r.print_info()
+
+	except Exception as error:
+		print("ERROR: %(error)s" % {'error': error })
+
+	print("###################################################")
+
+
+
+
 
 	sys.exit()
