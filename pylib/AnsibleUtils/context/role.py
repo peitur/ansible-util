@@ -1,13 +1,13 @@
 
-import AnsibleUtil.admin
-import AnsibleUtil.util
-import AnsibleUtil.io
-import AnsibleUtil.ioformat
+import AnsibleUtils.admin
+import AnsibleUtils.util
+import AnsibleUtils.io
+import AnsibleUtils.ioformat
 
 
 class AnsibleRole:
 
-	def __initialize__( self, *options ):
+	def __init__( self, *options ):
 		pass
 
 

@@ -2,11 +2,11 @@
 import re, sys, os, getopt
 import json, yaml
 
-import AnsibleUtil.util
+import AnsibleUtils.util
 
 class Writer:
 
-	def __initialize( self, filename, *options ):
+	def __init__( self, filename, *options ):
 
 		self.filename = filename
 		self.overwrite = True
@@ -101,5 +101,5 @@ class Writer:
 
 
 
-if( _name_ == '__main__'):
+if( __name__ == '__main__'):
 	sys.exit()

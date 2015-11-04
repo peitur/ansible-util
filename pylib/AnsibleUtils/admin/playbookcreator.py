@@ -1,14 +1,14 @@
 
-import AnsibleUtil.admin
-import AnsibleUtil.util
-import AnsibleUtil.io
-import AnsibleUtil.ioformat
-import AnsibleUtil.admin.creator
+import AnsibleUtils.admin
+import AnsibleUtils.util
+import AnsibleUtils.io
+import AnsibleUtils.ioformat
+import AnsibleUtils.admin.creator
 
 
-class PlaybookCreator(  AnsibleUtil.admin.creator.Creator  ):
+class PlaybookCreator(  AnsibleUtils.admin.creator.Creator  ):
 
-	def __initialize__( self, *options ):
+	def __init__( self, *options ):
 		pass
 
 		
@@ -17,5 +17,5 @@ class PlaybookCreator(  AnsibleUtil.admin.creator.Creator  ):
 
 
 
-if( _name_ == '__main__') :
+if( __name__ == '__main__') :
 	sys.exit()

@@ -1,11 +1,11 @@
 import re, sys, os
 import json, yaml
 
-import AnsibleUtil.util
+import AnsibleUtils.util
 
 
 class Json:
-	def __initialize__( self, *options ):
+	def __init__( self, *options ):
 		pass
 
 
@@ -13,5 +13,5 @@ class Json:
 
 
 
-if( _name_ == '__main__') :
+if( __name__ == '__main__') :
 	sys.exit()

@@ -1,14 +1,14 @@
 
 
-import AnsibleUtil.admin
-import AnsibleUtil.util
-import AnsibleUtil.io
-import AnsibleUtil.ioformat
+import AnsibleUtils.admin
+import AnsibleUtils.util
+import AnsibleUtils.io
+import AnsibleUtils.ioformat
 
 
 class Creator:
 
-	def __initialize__( self, *options ):
+	def __init__( self, *options ):
 		pass
 
 		
@@ -18,5 +18,5 @@ class Creator:
 
 
 
-if( _name_ == '__main__') :
+if( __name__ == '__main__') :
 	sys.exit()

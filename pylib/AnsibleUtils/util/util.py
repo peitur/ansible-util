@@ -17,5 +17,5 @@ def is_template( filename ):
 
 
 
-if( _name_ == '__main__') :
+if( __name__ == '__main__') :
 	sys.exit()

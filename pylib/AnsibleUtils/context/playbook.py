@@ -7,7 +7,7 @@ import AnsibleUtil.ioformat
 
 class AnsiblePlaybook:
 
-	def __initialize__( self, *options ):
+	def __init__( self, *options ):
 		pass
 
 		
