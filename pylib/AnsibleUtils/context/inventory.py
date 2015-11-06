@@ -22,7 +22,7 @@ INTERPRETERS = []
 
 
 
-class Inventory:
+class AnsibleInventory:
 
 	## options:
 	##  - debug: 		Enable debugging, including all subclasses
