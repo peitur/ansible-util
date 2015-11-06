@@ -7,7 +7,15 @@ import AnsibleUtils.ioformat
 
 class AnsibleRole:
 
-	def __init__( self, *options ):
+	def __init__( self, filenmae, options = {} ):
+
+		self.filename = filename
+		self.debug = False
+		self.format = "role"
+
+		if 'debug' in options: self.debug = options['debug']
+
+
 		pass
 
 

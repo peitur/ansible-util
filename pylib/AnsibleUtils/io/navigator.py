@@ -13,6 +13,8 @@ class Navigator:
 
 		self.file_or_path = file_or_path
 		self.debug = False
+		self.tyoe = None
+		
 
 
 		if 'debug' in options: self.debug = options['debug']

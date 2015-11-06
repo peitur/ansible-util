@@ -13,17 +13,39 @@ class Reader:
 		self.debug = False
 		self.format = None
 
-		print("Reader, options : %(opt)s" % { 'opt': options })
-
-
 		if 'format' in options: self.format = options['format']
 		if 'debug' in options: self.debug = options['debug']
+
+		if debug : print("Reader, options : %(opt)s" % { 'opt': options })
+
 
 		if not self.format: self.format = util.format_detect( filename )
 
 
+
+	def __load_inventory__( self, options = {} ):
+		filename = self.filename
+		if 'filename' in options: filename = options['filename']
+
+		debug = self.debug
+		if 'debug' in options: debug = options['debug']
+
+		data = ""
+		try:
+			fd = open( filename, "r" )
+			for line in fd:	
+				data += line
+
+			return data
+		except:
+			raise
+
+		return None
+
+
+
 	def __load_yaml__( self, options = {} ):
-		filename = self.filename		
+		filename = self.filename
 		if 'filename' in options: filename = options['filename']
 
 		debug = self.debug
@@ -49,8 +71,6 @@ class Reader:
 		debug = self.debug
 		if 'debug' in options: debug = options['debug']
 
-
-
 		data = ""
 		try:
 			fd = open( filename, "r" )
@@ -71,17 +91,29 @@ class Reader:
 		filename = self.filename		
 		if 'filename' in options: filename = options['filename']
 
-
 		if( debug ): print("DEBUG: Reader, reading %(format)s file : %(fname)s " % { 'format': self.format, 'fname': filename })
 
 		try:
 			
 			if( self.format == 'json' ): return self.__load_json__( )
 			elif( self.format == 'yaml' ): return self.__load_yaml__( )
+			elif( self.format == 'inventory' ): return self.__load_inventory__( )
 			else: raise RuntimeError("No format detected")
 
 		except: 
 			raise 
+
+
+	def format( self, f = None ):
+		if f:
+			self.format = f
+		return self.format
+
+
+	def filename( self, f = None ):
+		if f:
+			self.filename = f
+		return self.filename
 
 
 	def print_info( self ):

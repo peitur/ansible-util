@@ -20,6 +20,9 @@ class Writer:
 		if not self.format: self.format = util.format_detect( filename )
 
 
+	def __write_inventory_file__( self, data, options = {} ):
+		pass
+
 	def __write_yaml_file__( self, data, options = {} ):
 
 		debug = self.debug
@@ -88,12 +91,24 @@ class Writer:
 			return self.__write_yaml_file__( data )
 		elif( format == 'json' ):
 			return self.__write_json_file__( data )
+		elif( format == 'inventory' ):
+			return self.__write_inventory_file__( data )
 		else:
 			print("ERROR: Unknown file format : %(format)s " % { 'format': format } )
 
 		return None
 
 
+	def format( self, f = None ):
+		if f:
+			self.format = f
+		return self.format
+
+
+	def filename( self, f = None ):
+		if f:
+			self.filename = f
+		return self.filename
 
 
 	def print_info( self ):
