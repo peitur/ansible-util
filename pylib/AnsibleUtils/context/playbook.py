@@ -10,10 +10,21 @@ import AnsibleUtils.io.reader
 import AnsibleUtils.io.writer
 import AnsibleUtils.ioformat
 
+##########################################################
+## 
+##########################################################
 
 PLAYPARTS = ['vars','tasks','handlers']
 
 class AnsiblePlaybook:
+"""
+
+"""
+
+
+##########################################################
+## 
+##########################################################
 
 	def __init__( self, playname, options = {} ):
 		"""
@@ -50,6 +61,9 @@ class AnsiblePlaybook:
 				raise
 
 
+##########################################################
+## 
+##########################################################
 
 
 	def content( self, newcontent = None ):
@@ -60,7 +74,8 @@ class AnsiblePlaybook:
 		if newcontent : self.main = newcontent
 		return self.main
 
-		
+
+
 	def load( self, newfilename = None ):
 		"""
 
@@ -80,7 +95,6 @@ class AnsiblePlaybook:
 			robj = AnsibleUtils.io.reader.Reader( filename, { 'debug': self.debug, 'type': self.type } )
 			data = content = robj.read_file( )
 
-
 			content = []
 			main = []
 			for x in data:		
@@ -97,8 +111,9 @@ class AnsiblePlaybook:
 		return { 'main': self.main, 'content': self.content }
 
 
-
-
+##########################################################
+## 
+##########################################################
 	def __str__(self):
 		return ""+"debug:"+self.debug.__str__()+" filename:"+self.filename.__str__()+" auto_read:"+self.auto_read.__str__()+" content: "+self.content.__str__()
 

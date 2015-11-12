@@ -5,10 +5,18 @@ from pprint import pprint
 
 from AnsibleUtils.util import util
 
-
+##########################################################
+## 
+##########################################################
 class Reader:
-	
+"""
+
+"""
+
 	def __init__( self, filename = None, options = {} ):
+		"""
+		
+		"""
 
 		self.filename = filename
 		self.debug = False
@@ -18,8 +26,14 @@ class Reader:
 		if 'debug' in options: self.debug = options['debug']
 
 
-
+##########################################################
+## 
+##########################################################
 	def __load_inventory__( self, options = {} ):
+		"""
+		
+		"""
+
 		filename = self.filename
 		if 'filename' in options: filename = options['filename']
 
@@ -41,6 +55,10 @@ class Reader:
 
 
 	def __load_yaml__( self, options = {} ):
+		"""
+		
+		"""
+
 		filename = self.filename
 		if 'filename' in options: filename = options['filename']
 
@@ -61,6 +79,10 @@ class Reader:
 
 
 	def __load_json__( self, options = {}):
+		"""
+		
+		"""
+
 		filename = self.filename
 		if 'filename' in options: filename = options['filename']
 
@@ -79,8 +101,14 @@ class Reader:
 		return None
 
 
-
+##########################################################
+## 
+##########################################################
 	def read_file( self, options = {}):
+		"""
+		
+		"""
+
 		debug = self.debug
 		if 'debug' in options: debug = options['debug']
 
@@ -118,7 +146,9 @@ class Reader:
 		print("INFO: %(class)s N:%(fname)s D:%(debug)s F:%(format)s" % {'class': __class__ ,'fname': self.filename,'debug': self.debug,'format': self.format} )
 		
 
-#################################################################
+##########################################################
+## 
+##########################################################
 if( __name__ == '__main__') :
 	import builtins
 	import AnsibleUtils.io.reader
@@ -133,6 +163,7 @@ if( __name__ == '__main__') :
 		r = AnsibleUtils.io.reader.Reader( "../../../playbooks/erlang.json", { 'debug': True } )
 	#	r = Reader( "../../playbooks/erlang.json" )
 
+		print("Reader : %(r)s" % { 'r' : r.read_file() })
 		if( r ): r.print_info()
 
 	except Exception as error:

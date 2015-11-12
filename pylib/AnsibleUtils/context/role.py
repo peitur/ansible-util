@@ -6,6 +6,9 @@ import AnsibleUtils.ioformat
 
 from pprint import pprint
 
+##########################################################
+## 
+##########################################################
 
 DEFAULT_MAINFILE="main"
 DEFAULT_FILETYPE="yml"
@@ -20,7 +23,13 @@ ROLEPARTS = { "vars":"dict",
 			  "handlers":"list"
 			}
 
+##########################################################
+## 
+##########################################################
 class AnsibleRole:
+"""
+
+"""
 
 	def __init__( self, rolename, options = {} ):
 		"""
@@ -64,6 +73,8 @@ class AnsibleRole:
 
 		return self.content
 
-
+##########################################################
+## 
+##########################################################
 if( _name_ == '__main__') :
 	sys.exit()
