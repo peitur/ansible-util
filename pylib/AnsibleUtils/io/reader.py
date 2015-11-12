@@ -1,13 +1,14 @@
 
 import re, sys, os
 import json, yaml
+from pprint import pprint
 
 from AnsibleUtils.util import util
 
 
 class Reader:
 	
-	def __init__( self, filename, options = {} ):
+	def __init__( self, filename = None, options = {} ):
 
 		self.filename = filename
 		self.debug = False
@@ -15,11 +16,6 @@ class Reader:
 
 		if 'format' in options: self.format = options['format']
 		if 'debug' in options: self.debug = options['debug']
-
-		if debug : print("Reader, options : %(opt)s" % { 'opt': options })
-
-
-		if not self.format: self.format = util.format_detect( filename )
 
 
 
@@ -91,7 +87,9 @@ class Reader:
 		filename = self.filename		
 		if 'filename' in options: filename = options['filename']
 
-		if( debug ): print("DEBUG: Reader, reading %(format)s file : %(fname)s " % { 'format': self.format, 'fname': filename })
+		if not self.format: self.format = util.format_detect( filename )
+
+		if( debug ): print("[Reader.read_file]DEBUG: Reader, reading %(format)s file : %(fname)s " % { 'format': self.format, 'fname': filename })
 
 		try:
 			
@@ -135,7 +133,6 @@ if( __name__ == '__main__') :
 		r = AnsibleUtils.io.reader.Reader( "../../../playbooks/erlang.json", { 'debug': True } )
 	#	r = Reader( "../../playbooks/erlang.json" )
 
-		print("Reader : %(r)s" % { 'r' : r.read_file() })
 		if( r ): r.print_info()
 
 	except Exception as error:

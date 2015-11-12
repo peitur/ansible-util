@@ -1,12 +1,16 @@
 
 import re, sys, os, getopt
 import json, yaml
+from pprint import pprint
 
 from AnsibleUtils.util import util
 
 class Writer:
 
-	def __init__( self, filename, options = {} ):
+	def __init__( self, filename = None, options = {} ):
+		"""
+			
+		"""
 
 		self.filename = filename
 		self.overwrite = True
@@ -17,13 +21,18 @@ class Writer:
 		if 'debug' in options: self.debug = options['debug']
 		if 'overwrite' in options: self.complete = options['overwrite']
 
-		if not self.format: self.format = util.format_detect( filename )
-
 
 	def __write_inventory_file__( self, data, options = {} ):
+		"""
+			
+		"""
+
 		pass
 
 	def __write_yaml_file__( self, data, options = {} ):
+		"""
+			
+		"""
 
 		debug = self.debug
 		overwrite = self.overwrite
@@ -50,6 +59,9 @@ class Writer:
 
 
 	def __write_json_file__( self, data, options = {} ):
+		"""
+			
+		"""
 
 		debug = self.debug
 		overwrite = self.overwrite
@@ -74,6 +86,9 @@ class Writer:
 		return True
 
 	def write_file( self, data, options = {} ):
+		"""
+			
+		"""
 
 		format = self.format
 		debug = self.debug
@@ -84,6 +99,10 @@ class Writer:
 		if 'overwrite' in options: complete = options['overwrite']
 		if 'format' in options: format = options['format']
 		if 'filename' in options: filename = options['filename']
+
+		if not self.format: self.format = util.format_detect( filename )
+
+
 
 		if(debug) : print("DEBUG[WriteFile]: File:%(filename)s D:%(debug)s O:%(overwrite)s F:%(format)s" % {'filename': filename, 'debug':debug, 'overwrite':overwrite, 'format':format})
 
