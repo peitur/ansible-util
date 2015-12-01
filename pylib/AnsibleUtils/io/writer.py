@@ -9,9 +9,9 @@ from AnsibleUtils.util import util
 ## 
 ##########################################################
 class Writer:
-"""
+	"""
 
-"""
+	"""
 
 	def __init__( self, filename = None, options = {} ):
 		"""

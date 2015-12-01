@@ -27,9 +27,9 @@ ROLEPARTS = { "vars":"dict",
 ## 
 ##########################################################
 class AnsibleRole:
-"""
+	"""
 
-"""
+	"""
 
 	def __init__( self, rolename, options = {} ):
 		"""

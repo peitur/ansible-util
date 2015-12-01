@@ -17,9 +17,9 @@ import AnsibleUtils.ioformat
 PLAYPARTS = ['vars','tasks','handlers']
 
 class AnsiblePlaybook:
-"""
+	"""
 
-"""
+	"""
 
 
 ##########################################################
