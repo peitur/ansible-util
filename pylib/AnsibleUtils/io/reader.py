@@ -9,9 +9,9 @@ from AnsibleUtils.util import util
 ## 
 ##########################################################
 class Reader:
-"""
+	"""
 
-"""
+	"""
 
 	def __init__( self, filename = None, options = {} ):
 		"""
@@ -46,6 +46,8 @@ class Reader:
 			for line in fd:	
 				data += line
 
+			fd.close()
+
 			return data
 		except:
 			raise
@@ -71,6 +73,8 @@ class Reader:
 			for line in fd:	
 				data += line
 
+			fd.close()
+
 			return yaml.load( data )
 		except:
 			raise
@@ -94,6 +98,9 @@ class Reader:
 			fd = open( filename, "r" )
 			for line in fd:	
 				data += line
+
+			fd.close()
+
 			return json.loads( data )
 		except:
 			raise
