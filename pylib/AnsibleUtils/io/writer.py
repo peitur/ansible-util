@@ -23,6 +23,8 @@ class Writer:
 		self.debug = False
 		self.format = None
 
+#		if not self.format and self.filename: self.format = util.format_detect( self.filename )
+
 		if 'format' in options: self.format = options['format']
 		if 'debug' in options: self.debug = options['debug']
 		if 'overwrite' in options: self.complete = options['overwrite']
@@ -82,6 +84,10 @@ class Writer:
 
 		if(debug) : print("DEBUG[WriteJson]: F:%(filename)s" % {'filename': filename})
 
+		if not filename:
+			raise RuntimeError("No write file specified")
+			
+
 		if( os.path.exists( filename ) and not overwrite ): return None
 
 		try:
@@ -112,11 +118,12 @@ class Writer:
 		if 'format' in options: format = options['format']
 		if 'filename' in options: filename = options['filename']
 
-		if not self.format: self.format = util.format_detect( filename )
-
-
-
+		if not format and filename: format = util.format_detect( filename )
+		
 		if(debug) : print("DEBUG[WriteFile]: File:%(filename)s D:%(debug)s O:%(overwrite)s F:%(format)s" % {'filename': filename, 'debug':debug, 'overwrite':overwrite, 'format':format})
+
+		if not filename:
+			raise RuntimeError("No write file specified")
 
 		if( format == 'yaml') : 
 			return self.__write_yaml_file__( data )
@@ -126,6 +133,7 @@ class Writer:
 			return self.__write_inventory_file__( data )
 		else:
 			print("ERROR: Unknown file format : %(format)s " % { 'format': format } )
+			raise RuntimeError("Unknown file format")
 
 		return None
 
