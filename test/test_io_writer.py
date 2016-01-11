@@ -4,7 +4,8 @@ import unittest
 import os, sys, shutil
 sys.path.append( "../pylib")
 
-from  AnsibleUtils.util import util
+from pprint import pprint
+from AnsibleUtils.util import util
 from AnsibleUtils.io.reader import Reader
 from AnsibleUtils.io.writer import Writer
 
@@ -32,11 +33,11 @@ class TestIoReader(unittest.TestCase):
 	def test_write_files( self ):
 		## Ok files
 		for f in self.read_files:
-			r = Reader( f, { 'debug':self.debug } ).read_file()
+			r = Reader( f, debug=self.debug ).read_file()
 
 			for x in self.target_files:
-				self.assertIsNotNone( Writer( x, { 'debug':self.debug } ).write_file( r ) )
-				self.assertIsNotNone( Reader( x, { 'debug':self.debug } ).read_file() )
+				self.assertIsNotNone( Writer( x, debug=self.debug ).write_file( r ) )
+				self.assertIsNotNone( Reader( x, debug=self.debug ).read_file() )
 
 
 

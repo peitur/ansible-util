@@ -25,7 +25,7 @@ class TestIoReader(unittest.TestCase):
 	def test_read_files( self ):
 		## Ok files
 		for f in self.ok_files:
-			self.assertIsNotNone( Reader( f ).read_file() )
+			self.assertIsNotNone( Reader( f ).read_file( ) )
 
 	def test_bad_format_file( self ):
 		## Badly formated file content

@@ -1,9 +1,11 @@
 
-import re, sys, os
+import re, sys, os, getopt
 import json, yaml
 from pprint import pprint
 
 from AnsibleUtils.util import util
+import AnsibleUtils.ioformat.json
+import AnsibleUtils.ioformat.yaml
 
 ##########################################################
 ## 
@@ -13,7 +15,7 @@ class Reader:
 
 	"""
 
-	def __init__( self, filename = None, options = {} ):
+	def __init__( self, filename = None, **options ):
 		"""
 		
 		"""
@@ -29,11 +31,10 @@ class Reader:
 ##########################################################
 ## 
 ##########################################################
-	def __load_inventory__( self, options = {} ):
+	def __load_inventory__( self, **options ):
 		"""
 		
 		"""
-
 		filename = self.filename
 		if 'filename' in options: filename = options['filename']
 
@@ -56,62 +57,34 @@ class Reader:
 
 
 
-	def __load_yaml__( self, options = {} ):
-		"""
+	def __load_yaml__( self, **options ):
+
+		if self.filename: 
+			options['filename'] = self.filename
+		else :
+			raise RuntimeError("[LoadYaml]ERROR: Missing Filename")
+
+		if self.debug: options['debug'] = self.debug
+		if self.format: options['format'] = self.format
+
+		return AnsibleUtils.ioformat.yaml.Yaml( **options ).read()
+
+	def __load_json__( self, **options ):
+
+		if self.filename: 
+			options['filename'] = self.filename
+		else :
+			raise RuntimeError("[LoadJson]ERROR: Missing Filename")
+
+		if self.debug: options['debug'] = self.debug
+		if self.format: options['format'] = self.format
 		
-		"""
-
-		filename = self.filename
-		if 'filename' in options: filename = options['filename']
-
-		debug = self.debug
-		if 'debug' in options: debug = options['debug']
-
-		data = ""
-		try:
-			fd = open( filename, "r" )
-			for line in fd:	
-				data += line
-
-			fd.close()
-
-			return yaml.load( data )
-		except:
-			raise
-
-		return None
-
-
-	def __load_json__( self, options = {}):
-		"""
-		
-		"""
-
-		filename = self.filename
-		if 'filename' in options: filename = options['filename']
-
-		debug = self.debug
-		if 'debug' in options: debug = options['debug']
-
-		data = ""
-		try:
-			fd = open( filename, "r" )
-			for line in fd:	
-				data += line
-
-			fd.close()
-
-			return json.loads( data )
-		except:
-			raise
-
-		return None
-
+		return AnsibleUtils.ioformat.json.Json( **options ).read()
 
 ##########################################################
 ## 
 ##########################################################
-	def read_file( self, options = {}):
+	def read_file( self, **options ):
 		"""
 		
 		"""

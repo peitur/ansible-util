@@ -4,6 +4,9 @@ import json, yaml
 from pprint import pprint
 
 from AnsibleUtils.util import util
+import AnsibleUtils.ioformat.json
+import AnsibleUtils.ioformat.yaml
+
 
 ##########################################################
 ## 
@@ -13,7 +16,7 @@ class Writer:
 
 	"""
 
-	def __init__( self, filename = None, options = {} ):
+	def __init__( self, filename = None, **options ):
 		"""
 			
 		"""
@@ -33,77 +36,43 @@ class Writer:
 ##########################################################
 ## 
 ##########################################################
-	def __write_inventory_file__( self, data, options = {} ):
+	def __write_inventory_file__( self, data, **options ):
 		"""
 			
 		"""
 
 		pass
 
-	def __write_yaml_file__( self, data, options = {} ):
-		"""
-			
-		"""
+	def __write_yaml_file__( self, data, **options ):
+		
+		if self.filename: 
+			options['filename'] = self.filename
+		else :
+			raise RuntimeError("[WriteYaml]ERROR: Missing Filename")
 
-		debug = self.debug
-		overwrite = self.overwrite
-		filename = self.filename
+		if self.debug: options['debug'] = self.debug
+		if self.format: options['format'] = self.format
+		if self.overwrite: options['overwrite'] = self.overwrite
+		return AnsibleUtils.ioformat.yaml.Yaml( **options ).write( data )
+ 
 
+	def __write_json_file__( self, data, **options ):
 
-		if 'debug' in options: debug = options['debug']
-		if 'overwrite' in options: complete = options['overwrite']
-		if 'filename' in options: filename = options['filename']
+		if self.filename: 
+			options['filename'] = self.filename
+		else :
+			raise RuntimeError("[WriteYaml]ERROR: Missing Filename")
 
-		if(debug) : print("DEBUG[WriteYaml]: F:%(filename)s" % {'filename': filename})
+		if self.debug: options['debug'] = self.debug
+		if self.format: options['format'] = self.format
+		if self.overwrite: options['overwrite'] = self.overwrite
+		return AnsibleUtils.ioformat.json.Json( **options ).write( data )
 
-		if( os.path.exists( filename ) and not overwrite ): return None
-
-		try:
-			fd = open( filename, "w" )
-			yaml.dump( data, fd , explicit_start=True, default_flow_style=False )
-			fd.close()
-		except Exception as error:
-			print("ERROR[WriteYaml]: %(error)s" & {error} )
-			raise
-			
-		return True
-
-
-	def __write_json_file__( self, data, options = {} ):
-		"""
-			
-		"""
-
-		debug = self.debug
-		overwrite = self.overwrite
-		filename = self.filename
-
-		if 'debug' in options: debug = options['debug']
-		if 'overwrite' in options: complete = options['overwrite']
-		if 'filename' in options: filename = options['filename']
-
-		if(debug) : print("DEBUG[WriteJson]: F:%(filename)s" % {'filename': filename})
-
-		if not filename:
-			raise RuntimeError("No write file specified")
-			
-
-		if( os.path.exists( filename ) and not overwrite ): return None
-
-		try:
-			fd = open( filename, "w" )
-			fd.write( json.dumps( data ) )
-			fd.close()
-		except Exception as error:
-			print("ERROR[WriteJson]: %(error)s" & {error} )
-			raise
-			
-		return True
 
 ##########################################################
 ## 
 ##########################################################
-	def write_file( self, data, options = {} ):
+	def write_file( self, data, **options ):
 		"""
 			
 		"""
